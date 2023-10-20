@@ -6,6 +6,7 @@ const Strings = {
     USER_NOT_FOUND: 'User not found',
     EMAIL_NOT_FOUND: 'Email does not exists',
     ERROR_RESPONSE: 'Something went wrong',
+    INVALID_EMAIL: "Invalid email provided"
 }
 
 export default Strings;
