@@ -8,6 +8,9 @@ class AccountRepository extends BaseRepository {
     static async findById(id) {
         return super.findByEmail(AccountModel, id);
     }
+    static async findByUsername(username) {
+        return await AccountModel.findOne({ username });
+    }
 }
 
 export default AccountRepository;
