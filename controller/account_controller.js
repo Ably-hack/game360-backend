@@ -4,7 +4,7 @@ import AccountService from "../services/account_service.js";
 class AccountController {
     static initialize(app) {
         app.post(Routes.LOGIN, AccountService.login);
-        app.posst(Routes.REGISTER, AccountService.register);
+        app.post(Routes.REGISTER, AccountService.register);
     }
 }
 
