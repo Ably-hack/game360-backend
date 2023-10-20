@@ -1,8 +1,5 @@
 const AccountRoutes = (apiVersion, servicePath = 'account') => {
     return {
-        get WELCOME() {
-            return `${apiVersion}/${servicePath}/welcome`
-        },
         get LOGIN() {
             return `${apiVersion}/${servicePath}/login`
         },

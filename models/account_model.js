@@ -1,15 +1,9 @@
 import mongoose from 'mongoose';
 
 const accountSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
+    email: String,
+    password: String,
+    token: String,
     favoriteTeams: [{
         type: String,
     }],
