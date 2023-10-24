@@ -22,7 +22,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const pubSubSubscriber = function (receivedData) {
-    console.log(receivedData, "#received-data");
     let { id, data } = receivedData?.data;
     if (id && data) {
         socketServer.io.emit(id, data);
