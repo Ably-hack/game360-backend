@@ -14,9 +14,30 @@ import SocketServer from './socket_server/socket.js';
 
 const app = express();
 const server = http.createServer(app);
+const socketServer = new SocketServer();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const pubSubSubscriber = function (_message, receivedData) {
+    if (socketServer && socketServer.ably) {
+        const { id, data } = receivedData;
+        if (id && data) {
+            const channel = socketServer.ably.channels.get("test");
+            channel.publish(id, data, (err) => {
+                if (err) {
+                    console.error("Error publishing data:", err);
+                } else {
+                    console.log("Data published successfully.");
+                }
+            });
+        } else {
+            console.error("Invalid data received.");
+        }
+    } else {
+        console.error("Socket server is not properly configured.");
+    }
+}
 class AppServer {
     constructor() {
         this.initializeAllProcesses();
@@ -35,7 +56,7 @@ class AppServer {
     }
 
     initSocketServer() {
-        global.socketServer = new SocketServer();
+        new SocketServer();
     }
 
     async initMiddleWare() {
@@ -61,6 +82,8 @@ class AppServer {
         const port = process.env.PORT || 8000;
         try {
             server.listen(port, async () => {
+                const channel = socketServer.ably.channels.get("football");
+                channel.subscribe('event', pubSubSubscriber);
                 console.log(`Application connected to port ${port}`);
             });
         }

@@ -6,14 +6,13 @@ export default class SocketServer {
     };
 
     handleConnectionStatus() {
-        this.ably.connection.on("connected", () => {
+        this.ably.connection.on("connected", (socket) => {
             console.log("client connected");
         })
     }
 
     handleDisconnect() {
         this.ably.connection.on("disconnected", () => {
-            this.ably.close();
             console.log("Client disconnected");
         })
     }
