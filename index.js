@@ -11,31 +11,21 @@ dotenv.config();
 import IndexController from './controller/index_controller.js';
 import Database from './datastore/database.js';
 import SocketServer from './socket_server/socket.js';
+import MessageBrokerService from "./services/message_broker.js";
+const messageBroker = new MessageBrokerService();
 
 const app = express();
 const server = http.createServer(app);
-const socketServer = new SocketServer();
+const socketServer = new SocketServer(server);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const pubSubSubscriber = function (_message, receivedData) {
-    if (socketServer && socketServer.ably) {
-        const { id, data } = receivedData;
-        if (id && data) {
-            const channel = socketServer.ably.channels.get("test");
-            channel.publish(id, data, (err) => {
-                if (err) {
-                    console.error("Error publishing data:", err);
-                } else {
-                    console.log("Data published successfully.");
-                }
-            });
-        } else {
-            console.error("Invalid data received.");
-        }
-    } else {
-        console.error("Socket server is not properly configured.");
+const pubSubSubscriber = function (receivedData) {
+    console.log(receivedData, "#received-data");
+    let { id, data } = receivedData?.data;
+    if (id && data) {
+        socketServer.io.emit(id, data);
     }
 }
 class AppServer {
@@ -48,16 +38,16 @@ class AppServer {
         this.initializeCORS();
         this.initializeDatabase();
         this.initializeController();
-        this.initSocketServer();
+        // this.initSocketServer(server);
     }
 
     async initializeDatabase() {
         Database.connectDatabase(app);
     }
 
-    initSocketServer() {
-        new SocketServer();
-    }
+    // initSocketServer() {
+    //     new SocketServer();
+    // }
 
     async initMiddleWare() {
         app.use('/static', express.static(path.join(__dirname, 'public')));
@@ -82,8 +72,9 @@ class AppServer {
         const port = process.env.PORT || 8000;
         try {
             server.listen(port, async () => {
-                const channel = socketServer.ably.channels.get("football");
+                const channel = messageBroker.ably.channels.get("football");
                 channel.subscribe('event', pubSubSubscriber);
+
                 console.log(`Application connected to port ${port}`);
             });
         }
