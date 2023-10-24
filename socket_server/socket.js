@@ -1,19 +1,21 @@
-import Ably from "ably";
+import { Server } from "socket.io";
+import Ably from "ably"
 export default class SocketServer {
-    constructor() {
-        this.ably = new Ably.Realtime.Promise(process.env.ABLY_API_KEY);
+    constructor(server) {
+        this.io = new Server(server);
         this.handleConnectionStatus();
-    };
-
-    handleConnectionStatus() {
-        this.ably.connection.on("connected", (socket) => {
-            console.log("client connected");
-        })
     }
 
-    handleDisconnect() {
-        this.ably.connection.on("disconnected", () => {
-            console.log("Client disconnected");
-        })
+    handleConnectionStatus() {
+        this.io.on("connection", (socket) => {
+            console.log(`Client ${socket.id} connected`);
+        });
+    }
+
+    handleDisconnect(socket) {
+        socket.on("disconnect", async () => {
+            socket.disconnect();
+            console.log(`Client ${socket.id} Disconnected`);
+        });
     }
 }
