@@ -27,6 +27,7 @@ class AccountService {
             }
             catch (error) {
                 console.error(error);
+                return ResponseHandler.sendErrorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
             }
         });
     }

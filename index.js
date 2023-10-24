@@ -10,6 +10,7 @@ dotenv.config();
 
 import IndexController from './controller/index_controller.js';
 import Database from './datastore/database.js';
+import SocketServer from './socket_server/socket.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -26,10 +27,19 @@ class AppServer {
         this.initializeCORS();
         this.initializeDatabase();
         this.initializeController();
+        this.initSocketServer(server)
     }
 
     async initializeDatabase() {
         Database.connectDatabase(app);
+    }
+
+    initSocketServer(server) {
+        global.socketServer = new SocketServer(server);
+    }
+
+    async initializeSocket() {
+        SocketServer(server);
     }
 
     async initMiddleWare() {
