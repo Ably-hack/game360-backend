@@ -7,6 +7,20 @@ import bcrypt from "bcrypt";
 import Preconditions from "../utils/preconditions.js";
 import Strings from "../lang/strings.js";
 class AccountService {
+    static async validateSession(req, res, next) {
+        let authToken = req.header.authorization;
+        if (!authToken) {
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.UNAUTHORIZED, Strings.USER_UNAUTHORIZED);
+        }
+        jwt.verify(authToken, process.env.TOKEN_SECRET, (err, decoded) => {
+            if (err) {
+                return ResponseHandler.sendErrorResponse(res, StatusCodes.UNAUTHORIZED, Strings.USER_UNAUTHORIZED);
+            }
+            req.user = decoded;
+            next();
+        });
+    }
+
     static async login(req, res) {
         const { email, password } = req.body;
         const badRequestError = Preconditions.checkNotNull({
@@ -25,7 +39,7 @@ class AccountService {
             if (user) {
                 const verifyPassword = await AccountRepository.comparePassword(password, user.password);
                 if (!verifyPassword) {
-                    return ResponseHandler.sendErrorResponse(res, StatusCodes.Strings.INVALID_CREDENTIALS);
+                    return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.INVALID_CREDENTIALS);
                 }
                 const token = jwt.sign({
                     user_id: user._id,
@@ -34,8 +48,8 @@ class AccountService {
                     process.env.TOKEN_SECRET, {
                     expiresIn: '2h'
                 });
-                user.token = token;
-                return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, Strings.LOGIN_SUCCESSFUL);
+                const responseBody = { accessToken: token }
+                return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, Strings.LOGIN_SUCCESSFUL, responseBody);
             } else {
                 return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.USER_NOT_FOUND);
             }
