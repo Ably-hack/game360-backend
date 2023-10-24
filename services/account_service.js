@@ -6,18 +6,28 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import Preconditions from "../utils/preconditions.js";
 import Strings from "../lang/strings.js";
+
 class AccountService {
     static async validateSession(req, res, next) {
         let authToken = req.header.authorization;
         if (!authToken) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.UNAUTHORIZED, Strings.USER_UNAUTHORIZED);
         }
-        jwt.verify(authToken, process.env.TOKEN_SECRET, (err, decoded) => {
+        jwt.verify(authToken, process.env.TOKEN_SECRET, async (err, decoded) => {
             if (err) {
                 return ResponseHandler.sendErrorResponse(res, StatusCodes.UNAUTHORIZED, Strings.USER_UNAUTHORIZED);
             }
-            req.user = decoded;
-            next();
+            try {
+                const user = await AccountRepository.findByEmail(decoded.email);
+                if (!user) {
+                    return ResponseHandler.sendErrorResponse(res, StatusCodes.UNAUTHORIZED, Strings.USER_UNAUTHORIZED);
+                }
+                req.user = decoded;
+                next();
+            }
+            catch (error) {
+                console.error(error);
+            }
         });
     }
 
@@ -48,7 +58,13 @@ class AccountService {
                     process.env.TOKEN_SECRET, {
                     expiresIn: '2h'
                 });
-                const responseBody = { accessToken: token }
+                const responseBody = {
+                    user: {
+                        id: user._id,
+                        email: user.email
+                    },
+                    accessToken: token,
+                }
                 return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, Strings.LOGIN_SUCCESSFUL, responseBody);
             } else {
                 return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.USER_NOT_FOUND);
