@@ -102,6 +102,16 @@ class AccountService {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
         }
     }
+
+    static connectUser() {
+        try {
+
+        }
+        catch (error) {
+            console.log(error)
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, "Something went wrong");
+        }
+    }
 }
 
 export default AccountService;

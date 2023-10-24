@@ -27,19 +27,15 @@ class AppServer {
         this.initializeCORS();
         this.initializeDatabase();
         this.initializeController();
-        this.initSocketServer(server)
+        this.initSocketServer();
     }
 
     async initializeDatabase() {
         Database.connectDatabase(app);
     }
 
-    initSocketServer(server) {
-        global.socketServer = new SocketServer(server);
-    }
-
-    async initializeSocket() {
-        SocketServer(server);
+    initSocketServer() {
+        global.socketServer = new SocketServer();
     }
 
     async initMiddleWare() {
