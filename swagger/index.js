@@ -7,5 +7,5 @@ export const swaggerUIOptions = {
             description: "Game360 API Services",
         },
     },
-    apis: ["./Routes/*.js"],
+    apis: ["./swagger/*.js"],
 }
