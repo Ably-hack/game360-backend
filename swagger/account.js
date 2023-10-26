@@ -12,6 +12,7 @@
  *           type: string
  *         password:
  *           type: string
+ * 
  */
 
 /**
