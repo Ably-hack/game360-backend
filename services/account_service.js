@@ -1,12 +1,12 @@
 import { StatusCodes } from "http-status-codes";
-import ResponseHandler from "../utils/response_handler.js";
+import ResponseHandler from "../utils/response_handler.js"
 import AccountRepository from "../repository/account_repo.js";
 import AccountModel from "../models/account_model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import Preconditions from "../utils/preconditions.js";
 import Strings from "../lang/strings.js";
-
+import MessageBrokerService from "./message_broker.js";
 class AccountService {
     static async validateSession(req, res, next) {
         let authToken = req.header.authorization;
@@ -103,12 +103,26 @@ class AccountService {
         }
     }
 
-    static connectUser() {
+    static connectUser(req, res) {
+        const { message } = req.body;
+        const badRequestError = Preconditions.checkNotNull({ message });
+        if (badRequestError) {
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequestError);
+        }
+        const messageBroker = new MessageBrokerService();
         try {
-
+            messageBroker.publish({
+                id: "Greetings",
+                data: {
+                    message,
+                    timestamp: new Date().toISOString()
+                }
+            });
+            return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, "Message published successfully");
         }
         catch (error) {
-            console.log(error)
+            console.error(error);
+            console.log("Error publishing message");
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, "Something went wrong");
         }
     }
