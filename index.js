@@ -5,6 +5,9 @@ import express from 'express';
 import http from 'http';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import swaggerUI from 'swagger-ui-express';
+import swaggerJSDoc from 'swagger-jsdoc';
+import { swaggerUIOptions } from './swagger/index.js';
 
 dotenv.config();
 
@@ -17,6 +20,7 @@ const messageBroker = new MessageBrokerService();
 const app = express();
 const server = http.createServer(app);
 const socketServer = new SocketServer(server);
+const specs = swaggerJSDoc(swaggerUIOptions);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -37,6 +41,7 @@ class AppServer {
         this.initializeCORS();
         this.initializeDatabase();
         this.initializeController();
+        this.initializeSwaggerDocs();
         // this.initSocketServer(server);
     }
 
@@ -47,6 +52,10 @@ class AppServer {
     // initSocketServer() {
     //     new SocketServer();
     // }
+
+    async initializeSwaggerDocs() {
+        app.use('/api', swaggerUI.serve, swaggerUI.setup(specs));
+    }
 
     async initMiddleWare() {
         app.use('/static', express.static(path.join(__dirname, 'public')));
