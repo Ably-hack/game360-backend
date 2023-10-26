@@ -9,11 +9,12 @@ import Strings from "../lang/strings.js";
 import MessageBrokerService from "./message_broker.js";
 class AccountService {
     static async validateSession(req, res, next) {
-        let authToken = req.header.authorization;
-        if (!authToken) {
+        const authToken = req.header('Authorization');
+        if (!authToken || !authToken.startsWith('Bearer ')) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.UNAUTHORIZED, Strings.USER_UNAUTHORIZED);
         }
-        jwt.verify(authToken, process.env.TOKEN_SECRET, async (err, decoded) => {
+        const token = authToken.replace('Bearer ', '');
+        jwt.verify(token, process.env.TOKEN_SECRET, async (err, decoded) => {
             if (err) {
                 return ResponseHandler.sendErrorResponse(res, StatusCodes.UNAUTHORIZED, Strings.USER_UNAUTHORIZED);
             }
