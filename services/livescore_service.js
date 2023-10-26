@@ -29,12 +29,16 @@ class LiveScoreService {
         }
     }
 
-    static async fetchCountryTeam(req, res) {
+    static async fetchLeagueTeams(req, res) {
+        const { league_id } = req.params;
         try {
-            // fetch country team
+            const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_teams&league_id=${league_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
+            const teamData = response?.data;
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Teams", teamData);
         }
         catch (error) {
             console.error(error);
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, "Something went wrong");
         }
     }
 }
