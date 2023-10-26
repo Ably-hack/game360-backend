@@ -97,7 +97,7 @@ class AccountService {
                 password: hashedPassword
             }));
             await createAccount.save();
-            return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, Strings.ACCOUNT_CREATED);
+            return ResponseHandler.sendResponseWithoutData(res, StatusCodes.CREATED, Strings.ACCOUNT_CREATED);
         }
         catch (error) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
