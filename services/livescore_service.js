@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import Preconditions from "../utils/preconditions.js";
 import Strings from "../lang/strings.js";
 import moment from "moment";
+import { removeLastCharacter } from "../utils/strings.js";
 class LiveScoreService {
     static BASE_URL = 'https://apiv3.apifootball.com';
     static API_KEY = process.env.API_FOOTBALL_KEY;
@@ -87,27 +88,30 @@ class LiveScoreService {
             let totalPlayers;
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_teams&team_id=${team_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const teamData = response?.data;
-            let teamId;
             if ((teamData ?? []).length) {
                 for (let team of teamData) {
                     teamId = team?.team_key;
                     let teamPlayers = team?.players;
                     totalPlayers = teamPlayers?.length;
                     for (let player of teamPlayers ?? []) {
+                        let playerPosition = player?.player_type;
+                        playerPosition = removeLastCharacter(playerPosition, 's');
                         let playerStats = {
                             id: player?.player_id,
                             picture: player?.player_image,
                             name: player?.player_name,
                             country: player?.player_country,
                             number: player?.player_number,
-                            position: player?.player_type,
+                            position: playerPosition,
                             age: player?.player_age,
                             goals: player?.player_goals,
                             assists: player?.player_assists,
                             ratings: player?.player_rating,
                             appearances: player?.player_match_played,
-                            yellow_cards: player?.player_yellow_cards,
-                            red_cards: player?.player_red_cards
+                            cards: {
+                                yellow: player?.player_yellow_cards,
+                                red: player?.player_red_cards
+                            }
                         }
                         players.push(playerStats);
                     }
@@ -170,6 +174,19 @@ class LiveScoreService {
         }
     }
 
+    static async leagueFixtureDetails(req, res) {
+        const { match_id } = req.params;
+        const badRequestError = Preconditions.checkNotNull({
+            match_id
+        });
+        if (badRequestError) {
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequestError);
+        }
+        const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_events&match_id=${match_id}&withPlayerStats=1&APIkey=${process.env.API_FOOTBALL_KEY}`);
+        const fixtureDetails = response?.data;
+        return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Fixture details", fixtureDetails);
+    }
+
     static async fetchLeagueStandings(req, res) {
         const { league_id } = req.params;
         const badRequestError = Preconditions.checkNotNull({ league_id });
@@ -177,11 +194,31 @@ class LiveScoreService {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequestError);
         }
         try {
+            let refinedData = [];
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_standings&league_id=${league_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const leagueTableData = response?.data;
             if (typeof leagueTableData == 'object' && leagueTableData.hasOwnProperty('message')) {
                 let message = leagueTableData?.message;
                 return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, message);
+            }
+            if ((leagueTableData ?? []).length) {
+                for (const standing of leagueTableData) {
+                    const refinedObj = {
+                        country_name: standing?.country_name,
+                        league_id: standing?.league_id,
+                        league_name: standing?.league_name,
+                        pos: standing?.overall_league_position,
+                        W: standing?.overall_league_W,
+                        D: standing?.overall_league_D,
+                        L: standing?.overall_league_L,
+                        F: standing?.overall_league_GF,
+                        A: standing?.overall_league_GA,
+                        PL: standing?.overall_league_payed,
+                        PTS: standing?.overall_league_PTS,
+                        logo: standing?.team_badge
+                    }
+                    refinedData.push(refinedObj);
+                }
             }
             return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, "League standings");
         }
