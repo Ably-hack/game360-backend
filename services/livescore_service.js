@@ -53,9 +53,22 @@ class LiveScoreService {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequestError);
         }
         try {
+            let refinedData = [];
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_teams&league_id=${league_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const leagueTeamData = response?.data;
-            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Teams", leagueTeamData);
+            if ((leagueTeamData ?? []).length) {
+                for (let team of leagueTeamData) {
+                    let refinedObj = {
+                        id: team?.team_key,
+                        name: team?.team_name,
+                        country: team?.team_country,
+                        year_founded: team?.team_founded,
+                        logo: team?.team_badge
+                    }
+                    refinedData.push(refinedObj);
+                }
+            }
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "League Teams", refinedData);
         }
         catch (error) {
             console.error(error);
@@ -70,9 +83,36 @@ class LiveScoreService {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequestError);
         }
         try {
+            let players = [];
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_teams&team_id=${team_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const teamData = response?.data;
-            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Team data", teamData);
+            if ((teamData ?? []).length) {
+                for (let team of teamData) {
+                    let teamPlayers = team?.players;
+                    for (let player of teamPlayers ?? []) {
+                        let playerStats = {
+                            id: player?.player_id,
+                            picture: player?.player_image,
+                            name: player?.player_name,
+                            country: player?.player_country,
+                            number: player?.player_number,
+                            position: player?.player_type,
+                            age: player?.player_age,
+                            goals: player?.player_goals,
+                            assists: player?.player_assists,
+                            ratings: player?.player_rating,
+                            appearances: player?.player_match_played,
+                            yellow_cards: player?.player_yellow_cards,
+                            red_cards: player?.player_red_cards
+                        }
+                        players.push(playerStats);
+                    }
+                }
+            }
+            const team = {
+                players: [...players],
+            }
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Team data", team);
         }
         catch (error) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
