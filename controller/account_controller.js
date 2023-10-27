@@ -5,6 +5,7 @@ class AccountController {
     static initialize(app) {
         app.post(Routes.LOGIN, AccountService.login);
         app.post(Routes.REGISTER, AccountService.register);
+        app.post(Routes.CONNECT, AccountService.connectUser);
     }
 }
 

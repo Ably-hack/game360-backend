@@ -11,6 +11,12 @@ const LiveScoreRoutes = (apiVersion, servicePath = 'livescore') => {
         },
         get FETCH_TEAM_FIXTURES() {
             return `${apiVersion}/${servicePath}/fixtures`
+        },
+        get FETCH_FIXTURE_DETAILS() {
+            return `${apiVersion}/${servicePath}/fixture/:match_id`
+        },
+        get FETCH_LEAGUE_TABLE() {
+            return `${apiVersion}/${servicePath}/league/standings/:league_id`
         }
     }
 }
