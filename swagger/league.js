@@ -40,4 +40,21 @@
  *     responses:
  *       200:
  *         description: Successful response
+ * 
+ * /v1/livescore/fixtures:
+ *   get:
+ *     parameters: 
+ *       - in: query
+ *         name: team_id 
+ *         required: true
+ *       - in: query
+ *         name: league_id
+ *         required: true
+ *     security: 
+ *       - bearerAuth: []
+ *     tags: [League]
+ *     description: Retrieve information on league fixtures.
+ *     responses:
+ *       200:
+ *         description: Successful response
  */
