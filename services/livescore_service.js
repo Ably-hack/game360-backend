@@ -131,6 +131,7 @@ class LiveScoreService {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.badRequestError);
         }
         try {
+            let refinedData = [];
             let startDate = moment().startOf('month').format('YYYY-MM-DD');
             let endDate = moment().endOf('month').format('YYYY-MM-DD');
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_events&from=${startDate}&to=${endDate}&league_id=${league_id}&team_id=${team_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
@@ -141,10 +142,50 @@ class LiveScoreService {
                     return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, "No event found");
                 }
             }
-            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Fixtures", fixtureData);
+            if ((fixtureData ?? []).length) {
+                for (let fixture of fixtureData) {
+                    let fixtureObj = {
+                        id: fixture?.match_id,
+                        country_id: fixture?.country_id,
+                        country_name: fixture?.country_name,
+                        league_name: fixture?.league_name,
+                        match_date: fixture?.match_date,
+                        home_team_id: fixture?.match_hometeam_id,
+                        away_team_id: fixture?.awayteam_id,
+                        home_team_name: fixture?.match_hometeam?.name,
+                        away_team_name: fixture?.match_awayteam?.name,
+                        home_team_score: fixture?.match_hometeam_score,
+                        away_team_score: fixture?.match_awayteam_score,
+                        home_team_logo: fixture?.team_home_badge,
+                        away_team_logo: fixture?.team_away_badge
+                    }
+                    refinedData.push(fixtureObj);
+                }
+            }
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Fixtures", refinedData);
         }
         catch (error) {
             console.error(error);
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
+        }
+    }
+
+    static async fetchLeagueStandings(req, res) {
+        const { league_id } = req.params;
+        const badRequestError = Preconditions.checkNotNull({ league_id });
+        if (badRequestError) {
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequestError);
+        }
+        try {
+            const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_standings&league_id=${league_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
+            const leagueTableData = response?.data;
+            if (typeof leagueTableData == 'object' && leagueTableData.hasOwnProperty('message')) {
+                let message = leagueTableData?.message;
+                return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, message);
+            }
+            return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, "League standings");
+        }
+        catch (error) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
         }
     }
