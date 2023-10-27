@@ -182,9 +182,109 @@ class LiveScoreService {
         if (badRequestError) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequestError);
         }
-        const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_events&match_id=${match_id}&withPlayerStats=1&APIkey=${process.env.API_FOOTBALL_KEY}`);
-        const fixtureDetails = response?.data;
-        return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Fixture details", fixtureDetails);
+        try {
+            const lineUpStats = {
+                lineup_player: 'player',
+                lineup_number: 'number',
+                player_key: 'id',
+                lineup_position: 'position'
+            };
+            const matchStats = {
+                ['Throw In']: 'throw_in',
+                ['Free Kick']: 'free_kick',
+                ['Penalty']: 'penalty',
+                ['Yellow Cards']: 'yellow_cards',
+                ['Ball Possession']: 'possession',
+                ['Offsides']: 'offside',
+                ['Corners']: 'corners',
+                ['Fouls']: 'fouls',
+                ['Substitution']: 'substitution',
+                ['On Target']: 'shots_on_target',
+                ['Shots Total']: 'shots_total',
+            };
+
+            const refinedData = [];
+            const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_events&match_id=${match_id}&withPlayerStats=1&APIkey=${process.env.API_FOOTBALL_KEY}`);
+            const fixtureDetails = response?.data;
+            if ((fixtureDetails ?? [])?.length) {
+                const lineupStatsKey = Object.keys(lineUpStats);
+                const matchStatsKey = Object.keys(matchStats);
+                for (const detail of fixtureDetails) {
+                    let teamStats = {
+                        stats: [],
+                        lineup: {
+                            hometeam_lineup: [],
+                            awayteam_lineup: []
+                        }
+                    };
+                    const homeTeamLineUp = detail?.lineup?.home?.starting_lineups ?? [];
+                    const awayTeamLineUp = detail?.lineup?.away?.starting_lineups ?? [];
+                    const matchStatistics = detail?.statistics;
+                    if (matchStatistics?.length) {
+                        matchStatistics?.forEach((stats) => {
+                            for (let params of matchStatsKey) {
+                                if (stats?.type === params) {
+                                    let statsObj = {
+                                        home: stats?.home,
+                                        away: stats?.away,
+                                        type: matchStats[stats?.type]
+                                    };
+                                    teamStats?.stats.push(statsObj);
+                                }
+                            }
+                        });
+                    };
+                    homeTeamLineUp?.forEach((lineup) => {
+                        let homeLineUpObj = {};
+                        for (let params of lineupStatsKey) {
+                            homeLineUpObj[lineUpStats[params]] = lineup[params];
+                        };
+                        teamStats.lineup.hometeam_lineup.push(homeLineUpObj);
+                    });
+                    awayTeamLineUp?.forEach((lineup) => {
+                        let awayLineUpObj = {};
+                        for (let params of lineupStatsKey) {
+                            awayLineUpObj[lineUpStats[params]] = lineup[params];
+                        };
+                        teamStats.lineup.awayteam_lineup.push(awayLineUpObj);
+                    });
+                    const refinedObj = {
+                        id: detail?.match_id,
+                        country_name: detail?.country_name,
+                        league_name: detail?.league_name,
+                        league_id: detail?.league_id,
+                        match: {
+                            date: detail?.match_date,
+                            time: detail?.match_time,
+                        },
+                        status: detail?.match_status,
+                        team_details: {
+                            home_team_id: detail?.match_hometeam_id,
+                            away_team_id: detail?.match_awayteam_id,
+                            home_team_name: detail?.match_hometeam_name,
+                            away_team_name: detail?.match_awayteam_name,
+                            home_team_logo: detail?.team_home_badge,
+                            away_team_logo: detail?.team_away_badge
+                        },
+                        formation: {
+                            home: detail?.match_hometeam_system,
+                            away: detail?.match_awayteam_system
+                        },
+                        stadium: detail?.match_stadium,
+                        league_year: detail?.league_year,
+                        match_stats: {
+                            ...teamStats
+                        }
+                    };
+                    refinedData.push(refinedObj);
+                }
+            }
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Fixture details", refinedData);
+        }
+        catch (error) {
+            console.log(error);
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
+        }
     }
 
     static async fetchLeagueStandings(req, res) {
