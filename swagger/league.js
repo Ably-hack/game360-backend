@@ -58,6 +58,20 @@
  *       200:
  *         description: Successful response
  * 
+ * /v1/livescore/fixture/{match_id}:
+ *   get:
+ *     parameters: 
+ *       - in: path
+ *         name: match_id 
+ *         required: true
+ *     security: 
+ *       - bearerAuth: []
+ *     tags: [League]
+ *     description: Retrieve information on league fixture match.
+ *     responses:
+ *       200:
+ *         description: Successful response
+ * 
  * /v1/livescore/league/standings/{league_id}:
  *   get:
  *     parameters: 
