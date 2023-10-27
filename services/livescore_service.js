@@ -3,7 +3,7 @@ import ResponseHandler from "../utils/response_handler.js"
 import { StatusCodes } from "http-status-codes";
 import Preconditions from "../utils/preconditions.js";
 import Strings from "../lang/strings.js";
-
+import moment from "moment";
 class LiveScoreService {
     static BASE_URL = 'https://apiv3.apifootball.com';
     static API_KEY = process.env.API_FOOTBALL_KEY;
@@ -84,11 +84,15 @@ class LiveScoreService {
         }
         try {
             let players = [];
+            let totalPlayers;
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_teams&team_id=${team_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const teamData = response?.data;
+            let teamId;
             if ((teamData ?? []).length) {
                 for (let team of teamData) {
+                    teamId = team?.team_key;
                     let teamPlayers = team?.players;
+                    totalPlayers = teamPlayers?.length;
                     for (let player of teamPlayers ?? []) {
                         let playerStats = {
                             id: player?.player_id,
@@ -111,13 +115,38 @@ class LiveScoreService {
             }
             const team = {
                 players: [...players],
+                total_players: totalPlayers,
             }
             return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Team data", team);
         }
         catch (error) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
         }
+    }
 
+    static async teamLeagueFixtures(req, res) {
+        const { league_id, team_id } = req.query;
+        const badRequestError = Preconditions.checkNotNull({ league_id, team_id });
+        if (badRequestError) {
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.badRequestError);
+        }
+        try {
+            let startDate = moment().startOf('month').format('YYYY-MM-DD');
+            let endDate = moment().endOf('month').format('YYYY-MM-DD');
+            const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_events&from=${startDate}&to=${endDate}&league_id=${league_id}&team_id=${team_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
+            const fixtureData = response?.data;
+            if (typeof fixtureData == 'object' && fixtureData.hasOwnProperty('message')) {
+                let message = fixtureData?.message;
+                if (message.includes("No event found")) {
+                    return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, "No event found");
+                }
+            }
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Fixtures", fixtureData);
+        }
+        catch (error) {
+            console.error(error);
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
+        }
     }
 }
 
