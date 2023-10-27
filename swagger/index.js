@@ -15,11 +15,6 @@ export const swaggerUIOptions = {
                 }
             }
         },
-        security: [
-            {
-                bearerAuth: [],
-            },
-        ],
     },
     apis: ["./swagger/*.js"],
 }
