@@ -16,6 +16,9 @@ class AccountService {
         const token = authToken.replace('Bearer ', '');
         jwt.verify(token, process.env.TOKEN_SECRET, async (err, decoded) => {
             if (err) {
+                if (err?.name == "TokenExpiredError") {
+                    return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, "Token has expired");
+                }
                 return ResponseHandler.sendErrorResponse(res, StatusCodes.UNAUTHORIZED, Strings.USER_UNAUTHORIZED);
             }
             try {
