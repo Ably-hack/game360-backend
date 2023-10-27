@@ -220,7 +220,7 @@ class LiveScoreService {
                     refinedData.push(refinedObj);
                 }
             }
-            return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, "League standings");
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "League Standings", refinedData);
         }
         catch (error) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
