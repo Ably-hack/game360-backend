@@ -57,4 +57,18 @@
  *     responses:
  *       200:
  *         description: Successful response
+ * 
+ * /v1/livescore/league/standings/{league_id}:
+ *   get:
+ *     parameters: 
+ *       - in: path
+ *         name: league_id 
+ *         required: true
+ *     security: 
+ *       - bearerAuth: []
+ *     tags: [League]
+ *     description: Retrieve information on league standings.
+ *     responses:
+ *       200:
+ *         description: Successful response
  */
