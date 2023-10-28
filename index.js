@@ -17,6 +17,7 @@ const messageBroker = new MessageBrokerService();
 const app = express();
 const server = http.createServer(app);
 const socketServer = new SocketServer(server);
+const API_KEY = process.env.API_FOOTBALL_API_KEY;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
