@@ -343,8 +343,6 @@ class LiveScoreService {
     }
 
     static async Head2HeadStatistics(req, res) {
-        // firstTeamId = 164 
-        // secondTeamId = 141
         const { firstTeamId, secondTeamId } = req.query;
         const badRequestError = Preconditions.checkNotNull({ firstTeamId, secondTeamId });
         if (badRequestError) {
@@ -356,7 +354,6 @@ class LiveScoreService {
                 hometeam_matches: [],
                 awayteam_matches: []
             }
-            const refinedData = [];
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_H2H&firstTeamId=${firstTeamId}&secondTeamId=${secondTeamId}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const statsData = response?.data;
             const teamsMatchStats = statsData["firstTeam_VS_secondTeam"] ?? [];
