@@ -304,23 +304,57 @@ class LiveScoreService {
             if ((leagueTableData ?? []).length) {
                 for (const standing of leagueTableData) {
                     const refinedObj = {
-                        country_name: standing?.country_name,
-                        league_id: standing?.league_id,
-                        league_name: standing?.league_name,
+                        team: {
+                            country_name: standing?.country_name,
+                            league_id: standing?.league_id,
+                            league_name: standing?.league_name,
+                            team_name: standing?.team_name,
+                            team_id: standing?.team_id,
+                        },
+                        stats: {
+                            W: standing?.overall_league_W,
+                            D: standing?.overall_league_D,
+                            L: standing?.overall_league_L,
+                            F: standing?.overall_league_GF,
+                            A: standing?.overall_league_GA,
+                            PL: standing?.overall_league_payed,
+                            PTS: standing?.overall_league_PTS,
+                        },
                         pos: standing?.overall_league_position,
-                        W: standing?.overall_league_W,
-                        D: standing?.overall_league_D,
-                        L: standing?.overall_league_L,
-                        F: standing?.overall_league_GF,
-                        A: standing?.overall_league_GA,
-                        PL: standing?.overall_league_payed,
-                        PTS: standing?.overall_league_PTS,
                         logo: standing?.team_badge
                     }
                     refinedData.push(refinedObj);
                 }
             }
             return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "League Standings", refinedData);
+        }
+        catch (error) {
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
+        }
+    }
+
+    static async liveScoreFeed(req, res) {
+        try {
+
+        }
+        catch (error) {
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
+        }
+    }
+
+    static async Head2HeadStatistics(req, res) {
+        const { firstTeamId, secondTeamId } = req.query;
+        const badRequestError = Preconditions.checkNotNull({ firstTeamId, secondTeamId });
+        if (badRequestError) {
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequetError);
+        }
+        try {
+            const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_H2H&firstTeamId=${firstTeamId}&secondTeamId=${secondTeamId}&APIkey=${process.env.API_FOOTBALL_KEY}`);
+            const statsData = response?.data;
+            if (statsData?.length) {
+                // const firstTea
+            }
+            // return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Head 2 Head Statistics", statsData);
         }
         catch (error) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
