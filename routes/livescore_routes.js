@@ -20,6 +20,9 @@ const LiveScoreRoutes = (apiVersion, servicePath = 'livescore') => {
         },
         get HEAD2HEAD_STATISTICS() {
             return `${apiVersion}/${servicePath}/match/head_to_head`
+        },
+        get LIVESCORES() {
+            return `${apiVersion}/${servicePath}/live_matches`
         }
     }
 }

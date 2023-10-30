@@ -10,6 +10,7 @@ class LiveScoreController {
         app.get(Routes.FETCH_FIXTURE_DETAILS, AccountService.validateSession, LiveScoreService.leagueFixtureDetails);
         app.get(Routes.FETCH_LEAGUE_TABLE, AccountService.validateSession, LiveScoreService.fetchLeagueStandings);
         app.get(Routes.HEAD2HEAD_STATISTICS, AccountService.validateSession, LiveScoreService.Head2HeadStatistics);
+        app.get(Routes.LIVESCORES, AccountService.validateSession, LiveScoreService.liveScoreFeed);
     }
 }
 
