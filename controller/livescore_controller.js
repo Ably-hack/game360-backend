@@ -9,6 +9,7 @@ class LiveScoreController {
         app.get(Routes.FETCH_TEAM_FIXTURES, AccountService.validateSession, LiveScoreService.teamLeagueFixtures);
         app.get(Routes.FETCH_FIXTURE_DETAILS, AccountService.validateSession, LiveScoreService.leagueFixtureDetails);
         app.get(Routes.FETCH_LEAGUE_TABLE, AccountService.validateSession, LiveScoreService.fetchLeagueStandings);
+        app.get(Routes.HEAD2HEAD_STATISTICS, AccountService.validateSession, LiveScoreService.Head2HeadStatistics);
     }
 }
 

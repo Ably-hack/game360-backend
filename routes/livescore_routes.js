@@ -17,6 +17,9 @@ const LiveScoreRoutes = (apiVersion, servicePath = 'livescore') => {
         },
         get FETCH_LEAGUE_TABLE() {
             return `${apiVersion}/${servicePath}/league/standings/:league_id`
+        },
+        get HEAD2HEAD_STATISTICS() {
+            return `${apiVersion}/${servicePath}/match/head_to_head`
         }
     }
 }

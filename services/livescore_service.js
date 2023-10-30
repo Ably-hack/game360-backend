@@ -343,21 +343,91 @@ class LiveScoreService {
     }
 
     static async Head2HeadStatistics(req, res) {
+        // firstTeamId = 164 
+        // secondTeamId = 141
         const { firstTeamId, secondTeamId } = req.query;
         const badRequestError = Preconditions.checkNotNull({ firstTeamId, secondTeamId });
         if (badRequestError) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequetError);
         }
         try {
+            const statsField = {
+                head_to_head: [],
+                hometeam_matches: [],
+                awayteam_matches: []
+            }
+            const refinedData = [];
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_H2H&firstTeamId=${firstTeamId}&secondTeamId=${secondTeamId}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const statsData = response?.data;
-            if (statsData?.length) {
-                // const firstTea
+            const teamsMatchStats = statsData["firstTeam_VS_secondTeam"] ?? [];
+            if (teamsMatchStats) {
+                for (let stat of teamsMatchStats ?? []) {
+                    const refinedObj = {
+                        match_id: stat?.match_id,
+                        league_id: stat?.league_id,
+                        league_name: stat?.league_name,
+                        date_played: stat?.match_date,
+                        match_status: stat?.match_status,
+                        time_played: stat?.match_time,
+                        home_team: stat?.match_hometeam_name,
+                        away_team: stat?.match_awayteam_name,
+                        goals: {
+                            home_team_goals: stat?.match_hometeam_score,
+                            away_team_goals: stat?.match_awayteam_score,
+                        },
+                        logo: {
+                            home_team_logo: stat?.team_home_badge,
+                            away_team_logo: stat?.team_away_badge
+                        }
+                    }
+                    statsField.head_to_head.push(refinedObj);
+                }
             }
-            // return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Head 2 Head Statistics", statsData);
+            const homeTeamStats = statsData["firstTeam_lastResults"];
+            if (homeTeamStats) {
+                const homeTeamResults = LiveScoreService.fetchTeamsLastFiveGames(homeTeamStats);
+                statsField.hometeam_matches.push([...homeTeamResults]);
+            }
+            const awayTeamStats = statsData["secondTeam_lastResults"];
+            if (awayTeamStats) {
+                const awayTeamResults = LiveScoreService.fetchTeamsLastFiveGames(awayTeamStats);
+                statsField.awayteam_matches.push([...awayTeamResults]);
+            }
+
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Head 2 Head Statistics", statsField);
         }
         catch (error) {
+            console.error(error);
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
+        }
+    }
+
+    static fetchTeamsLastFiveGames(data) {
+        try {
+            const lastFiveGames = data?.slice(0, 5)?.map((team) => {
+                return {
+                    match_id: team?.match_id,
+                    league_id: team?.league_id,
+                    league_name: team?.league_name,
+                    date_played: team?.match_date,
+                    match_status: team?.match_status,
+                    time_played: team?.match_time,
+                    home_team: team?.match_hometeam_name,
+                    away_team: team?.match_awayteam_name,
+                    goals: {
+                        home_team_goals: team?.match_hometeam_score,
+                        away_team_goals: team?.match_awayteam_score,
+                    },
+                    logo: {
+                        home_team_logo: team?.team_home_badge,
+                        away_team_logo: team?.team_away_badge
+                    }
+                }
+            });
+            return lastFiveGames;
+        }
+        catch (error) {
+            console.log(error);
         }
     }
 }
