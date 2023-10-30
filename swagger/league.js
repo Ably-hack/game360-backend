@@ -85,4 +85,21 @@
  *     responses:
  *       200:
  *         description: Successful response
+ * 
+ * /v1/livescore/match/head_to_head:
+ *   get:
+ *     parameters: 
+ *       - in: query
+ *         name: firstTeamId 
+ *         required: true
+ *      - in: query
+ *         name: secondTeamId 
+ *         required: true
+ *     security: 
+ *       - bearerAuth: []
+ *     tags: [League]
+ *     description: Retrieve information on team Head-2-Head matches
+ *     responses:
+ *       200:
+ *         description: Successful response
  */
