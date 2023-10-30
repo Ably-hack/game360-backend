@@ -21,7 +21,6 @@ const app = express();
 const server = http.createServer(app);
 const socketServer = new SocketServer(server);
 const specs = swaggerJSDoc(swaggerUIOptions);
-const API_KEY = process.env.API_FOOTBALL_API_KEY;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -55,7 +54,9 @@ class AppServer {
     // }
 
     async initializeSwaggerDocs() {
-        app.use('/api', swaggerUI.serve, swaggerUI.setup(specs));
+        app.use('/api', swaggerUI.serve, swaggerUI.setup(specs, {
+            customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.0.0/swagger-ui.min.css"
+        }));
     }
 
     async initMiddleWare() {
