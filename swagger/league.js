@@ -84,7 +84,7 @@
  *     description: Retrieve information on league standings.
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: 
  * 
  * /v1/livescore/match/head_to_head:
  *   get:
@@ -92,7 +92,7 @@
  *       - in: query
  *         name: firstTeamId 
  *         required: true
- *      - in: query
+ *       - in: query
  *         name: secondTeamId 
  *         required: true
  *     security: 
@@ -101,5 +101,6 @@
  *     description: Retrieve information on team Head-2-Head matches
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: 
+ * 
  */
