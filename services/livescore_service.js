@@ -7,6 +7,8 @@ import ResponseHandler from "../utils/response_handler.js";
 import { removeLastCharacter } from "../utils/strings.js";
 import WebSocket from "ws";
 import MessageBrokerService from "./message_broker.js";
+import LiveScoreModel from "../models/livescore_model.js";
+import LiveScoreRepository from "../repository/livescore_repo.js";
 class LiveScoreService {
     static BASE_URL = 'https://apiv3.apifootball.com';
     static API_KEY = process.env.API_FOOTBALL_KEY;
@@ -336,51 +338,27 @@ class LiveScoreService {
     }
 
     static async liveScoreFeed(req, res) {
+        const { league_id } = req.params;
         const messageBroker = new MessageBrokerService();
-        const refinedData = [];
         try {
-            const socketUrl = `wss://wss.apifootball.com/livescore?action=livescore&APIkey=${process.env.API_FOOTBALL_KEY}`;
-            const refinedData = [];
-
-            const socket = new WebSocket(socketUrl);
-
-            socket.addEventListener('open', (event) => {
-                console.log('Waiting for data...');
+            const liveScoreByLeagueId = await LiveScoreRepository.liveScoreByLeagueId(league_id);
+            if (liveScoreByLeagueId) {
                 messageBroker.publish({
-                    id: "livescore_pending",
+                    id: "livescore_data",
                     data: {
-                        message: "Livescore loading"
+                        message: liveScoreByLeagueId,
                     }
                 });
-            });
-
-            socket.addEventListener('message', (event) => {
-                if (event.data) {
-                    const livescoreData = JSON.parse(event.data);
-                    messageBroker.publish({
-                        id: "livesores",
-                        data: {
-                            message: livescoreData,
-                        }
-                    });
-                } else {
-                    messageBroker.publish({
-                        id: "livescore_error",
-                        data: {
-                            messsage: "No data",
-                        }
-                    });
-                }
-            });
-
-            socket.addEventListener('close', () => {
-                console.log('Connection closed');
-            });
-
-            socket.addEventListener('error', (error) => {
-                console.error('WebSocket error:', error);
-            });
-            return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, "Livescores");
+                return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Livescores", liveScoreByLeagueId);
+            } else {
+                messageBroker.publish({
+                    id: "livescore_error",
+                    data: {
+                        messsage: "No data",
+                    }
+                });
+                return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Livescores", []);
+            }
         }
         catch (error) {
             console.error(error);
