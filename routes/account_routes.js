@@ -5,6 +5,9 @@ const AccountRoutes = (apiVersion, servicePath = 'account') => {
         },
         get REGISTER() {
             return `${apiVersion}/${servicePath}/register`
+        },
+        get CONNECT() {
+            return `${apiVersion}/${servicePath}/connect`
         }
     }
 }
