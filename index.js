@@ -58,10 +58,9 @@ class AppServer {
     }
 
     async initializeSwaggerDocs() {
-        // app.use('/api', swaggerUI.serve, swaggerUI.setup(specs, {
-        //     customCssUrl: process.env.CUSTOM_CSS_URL
-        // }));
-        app.use('/api', swaggerUI.serve, swaggerUI.setup(specs));
+        app.use('/api', swaggerUI.serve, swaggerUI.setup(specs, {
+            customCssUrl: process.env.CUSTOM_CSS_URL
+        }));
     }
 
     async initMiddleWare() {
