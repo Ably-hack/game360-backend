@@ -15,7 +15,10 @@ import IndexController from './controller/index_controller.js';
 import Database from './datastore/database.js';
 import SocketServer from './socket_server/socket.js';
 import MessageBrokerService from "./services/message_broker.js";
+import LiveScoreServer from './socket_server/livescore_socket.js';
+
 const messageBroker = new MessageBrokerService();
+// const liveScoreServer = new LiveScoreServer();
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +45,7 @@ class AppServer {
         this.initializeDatabase();
         this.initializeController();
         this.initializeSwaggerDocs();
+        // this.initLiveScoreServer();
         // this.initSocketServer(server);
     }
 
@@ -49,13 +53,13 @@ class AppServer {
         Database.connectDatabase(app);
     }
 
-    // initSocketServer() {
-    //     new SocketServer();
-    // }
+    initLiveScoreServer() {
+        global.liveScoreServer = new LiveScoreServer();
+    }
 
     async initializeSwaggerDocs() {
         app.use('/api', swaggerUI.serve, swaggerUI.setup(specs, {
-            customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.0.0/swagger-ui.min.css"
+            customCssUrl: process.env.CUSTOM_CSS_URL
         }));
     }
 
