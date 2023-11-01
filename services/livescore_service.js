@@ -354,7 +354,7 @@ class LiveScoreService {
                 messageBroker.publish({
                     id: "livescore_error",
                     data: {
-                        messsage: "No data",
+                        message: [],
                     }
                 });
                 return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Livescores", []);
