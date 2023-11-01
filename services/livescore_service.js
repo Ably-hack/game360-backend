@@ -451,6 +451,49 @@ class LiveScoreService {
             console.log(error);
         }
     }
+
+    static async fetchLeagueFixtures(req, res) {
+        const { league_id } = req.params;
+        try {
+            const refinedData = [];
+            let startDate = moment().startOf('month').format('YYYY-MM-DD');
+            let endDate = moment().endOf('month').format('YYYY-MM-DD');
+
+            const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_events&from=${startDate}&to=${endDate}&league_id=${league_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
+            const leagueFixtureData = response?.data;
+            if (typeof leagueFixtureData == 'object' && leagueFixtureData.hasOwnProperty('message')) {
+                let message = leagueFixtureData?.message;
+                if (message.includes("No event found")) {
+                    return ResponseHandler.sendResponseWithoutData(res, StatusCodes.OK, "No event found");
+                }
+            }
+            if ((leagueFixtureData ?? []).length) {
+                for (let fixture of leagueFixtureData) {
+                    let fixtureObj = {
+                        id: fixture?.match_id,
+                        country_id: fixture?.country_id,
+                        country_name: fixture?.country_name,
+                        league_name: fixture?.league_name,
+                        match_date: fixture?.match_date,
+                        home_team_id: fixture?.match_hometeam_id,
+                        away_team_id: fixture?.awayteam_id,
+                        home_team_name: fixture?.match_hometeam?.name,
+                        away_team_name: fixture?.match_awayteam?.name,
+                        home_team_score: fixture?.match_hometeam_score,
+                        away_team_score: fixture?.match_awayteam_score,
+                        home_team_logo: fixture?.team_home_badge,
+                        away_team_logo: fixture?.team_away_badge
+                    }
+                    refinedData.push(fixtureObj);
+                }
+            }
+            return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "League fixtures", refinedData);
+        }
+        catch (error) {
+            console.error(error);
+            return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
+        }
+    }
 }
 
 export default LiveScoreService;

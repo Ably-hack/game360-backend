@@ -9,6 +9,9 @@ const LiveScoreRoutes = (apiVersion, servicePath = 'livescore') => {
         get FETCH_TEAM() {
             return `${apiVersion}/${servicePath}/team/:team_id`
         },
+        get FETCH_LEAGUE_FIXTURE() {
+            return `${apiVersion}/${servicePath}/league/fixtures/:league_id`
+        },
         get FETCH_TEAM_FIXTURES() {
             return `${apiVersion}/${servicePath}/fixtures`
         },
