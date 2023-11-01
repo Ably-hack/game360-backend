@@ -21,5 +21,5 @@ export const swaggerUIOptions = {
             url: "https://game360-backend-orcin.vercel.app",
         },
     ],
-    apis: ["./swagger/*.js"],
+    apis: ["./docs/*.js"],
 }

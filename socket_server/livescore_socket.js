@@ -4,7 +4,7 @@ import MessageBrokerService from "../services/message_broker.js";
 
 class LiveScoreServer {
     constructor() {
-        this.socketUrl = `wss://wss.apifootball.com/livescore?action=get_events&APIkey=${process.env.API_FOOTBALL_KEY}`;
+        this.socketUrl = `wss://wss.apifootball.com/livescore?action=livescore&APIkey=${process.env.API_FOOTBALL_KEY}`;
         this.webSocket = new WebSocket(this.socketUrl);
         this.messageBroker = new MessageBrokerService()
         this.handleOpenSocketConnection();

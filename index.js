@@ -5,12 +5,11 @@ import express from 'express';
 import http from 'http';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import swaggerUI from 'swagger-ui-express';
+import swaggerUi from 'swagger-ui-express'
 import swaggerJSDoc from 'swagger-jsdoc';
-import { swaggerUIOptions } from './swagger/index.js';
+import { swaggerUIOptions } from './docs/index.js';
 
 dotenv.config();
-
 import IndexController from './controller/index_controller.js';
 import Database from './datastore/database.js';
 import SocketServer from './socket_server/socket.js';
@@ -18,7 +17,6 @@ import MessageBrokerService from "./services/message_broker.js";
 import LiveScoreServer from './socket_server/livescore_socket.js';
 
 const messageBroker = new MessageBrokerService();
-// const liveScoreServer = new LiveScoreServer();
 
 const app = express();
 const server = http.createServer(app);
@@ -45,8 +43,7 @@ class AppServer {
         this.initializeDatabase();
         this.initializeController();
         this.initializeSwaggerDocs();
-        // this.initLiveScoreServer();
-        // this.initSocketServer(server);
+        this.initLiveScoreServer();
     }
 
     async initializeDatabase() {
@@ -58,7 +55,7 @@ class AppServer {
     }
 
     async initializeSwaggerDocs() {
-        app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(specs, {
+        app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
             customCssUrl: process.env.CUSTOM_CSS_URL
         }));
     }

@@ -103,4 +103,18 @@
  *       200:
  *         description: 
  * 
+ * /v1/livescore/league/fixtures/{league_id}:
+ *   get:
+ *     parameters: 
+ *       - in: path
+ *         name: league_id 
+ *         required: true
+ *     security: 
+ *       - bearerAuth: []
+ *     tags: [League]
+ *     description: Retrieve information on team Head-2-Head matches
+ *     responses:
+ *       200:
+ *         description: 
+ * 
  */
