@@ -20,6 +20,10 @@ const liveScoreSchema = new mongoose.Schema({
     hometeam_halftime_goal: String,
     awayteam_halftime_goal: String,
     stadium: String,
+    logo: {
+        home_team: String,
+        away_team: String,
+    },
     goalscorers: [{
         name: String,
         time: String,

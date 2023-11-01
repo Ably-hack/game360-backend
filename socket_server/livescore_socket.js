@@ -1,7 +1,6 @@
 import WebSocket from "ws";
 import LiveScoreRepository from "../repository/livescore_repo.js";
 import MessageBrokerService from "../services/message_broker.js";
-import LiveScoreModel from "../models/livescore_model.js";
 
 class LiveScoreServer {
     constructor() {
