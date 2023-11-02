@@ -6,6 +6,7 @@ export const swaggerUIOptions = {
             version: "1.0.0",
             description: "Game360 API Services",
         },
+        host: "0.0.0.0",
         components: {
             securitySchemes: {
                 bearerAuth: {
