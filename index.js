@@ -40,10 +40,10 @@ class AppServer {
     async initializeAllProcesses() {
         await this.initMiddleWare();
         this.initializeCORS();
-        this.initializeDatabase();
         this.initializeController();
         this.initializeSwaggerDocs();
         this.initLiveScoreServer();
+        this.initializeDatabase();
     }
 
     async initializeDatabase() {

@@ -18,7 +18,7 @@ export const swaggerUIOptions = {
     },
     servers: [
         {
-            url: "https://game360-backend-orcin.vercel.app",
+            url: "https://game360-backend-orcin.vercel.app/v1",
         },
     ],
     apis: ["./docs/*.js"],
