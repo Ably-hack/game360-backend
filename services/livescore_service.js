@@ -82,8 +82,8 @@ class LiveScoreService {
     }
 
     static async fetchTeam(req, res) {
-        const { team_id } = req.params;
-        const badRequestError = Preconditions.checkNotNull({ team_id });
+        const { league_id, team_id } = req.params;
+        const badRequestError = Preconditions.checkNotNull({ league_id, team_id });
         if (badRequestError) {
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, badRequestError);
         }
@@ -92,7 +92,7 @@ class LiveScoreService {
             let venue = {};
             let info = {};
             let totalPlayers;
-            const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_teams&team_id=${team_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
+            const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_teams&league_id=${league_id}&team_id=${team_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const teamData = response?.data;
             if ((teamData ?? []).length) {
                 for (let team of teamData) {
