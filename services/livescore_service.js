@@ -89,12 +89,14 @@ class LiveScoreService {
         }
         try {
             let players = [];
+            let venue = {};
+            let info = {};
             let totalPlayers;
             const response = await axios.get(`${LiveScoreService.BASE_URL}/?action=get_teams&team_id=${team_id}&APIkey=${process.env.API_FOOTBALL_KEY}`);
             const teamData = response?.data;
             if ((teamData ?? []).length) {
                 for (let team of teamData) {
-                    teamId = team?.team_key;
+                    let teamId = team?.team_key;
                     let teamPlayers = team?.players;
                     totalPlayers = teamPlayers?.length;
                     for (let player of teamPlayers ?? []) {
@@ -119,15 +121,30 @@ class LiveScoreService {
                         }
                         players.push(playerStats);
                     }
+                    let teamVenue = team?.venue;
+                    venue['stadium'] = teamVenue?.venue_name;
+                    venue['city'] = teamVenue?.venue_city;
+                    venue['capacity'] = teamVenue?.venue_capacity;
+
+                    info = {
+                        name: team?.team_name,
+                        country: team?.team_country,
+                        founded: team?.team_founded,
+                        logo: team?.team_badge,
+                    }
                 }
             }
+
             const team = {
                 players: [...players],
                 total_players: totalPlayers,
+                info,
+                venue
             }
             return ResponseHandler.sendResponseWithData(res, StatusCodes.OK, "Team data", team);
         }
         catch (error) {
+            console.error(error);
             return ResponseHandler.sendErrorResponse(res, StatusCodes.BAD_REQUEST, Strings.ERROR_RESPONSE);
         }
     }
